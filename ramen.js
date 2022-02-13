@@ -4,7 +4,6 @@
 const Discord = require('discord.js');
 const {prefix, token} = require('./config.json');
 const ytdl = require('ytdl-core');
-const { getInfo } = require('ytdl-core');
 
 // create a new Discord client
 const client = new Discord.Client();
@@ -12,8 +11,6 @@ const client = new Discord.Client();
 // Song queue
 const queue = new Map();
 
-// when the client is ready, run this code
-// this event will only trigger one time after logging in
 client.once('ready', () => 
 {
 	console.log('Ready!');
@@ -30,12 +27,12 @@ client.on('message', async message =>
 
 	if (!message.content.startsWith(prefix)) 
 	{
-		const globalMessage = message.content.slice(prefix.length).trim().split(/ +/).toLowerCase();
+		const globalMessage = message.content.toLowerCase().slice(prefix.length).trim().split(/ +/);
 		specialCommands(globalMessage);
 		return;
 	}
 
-	commands(message, parceMessage());
+	commands(message, parceMessage(message));
 
 });
 
@@ -58,11 +55,11 @@ function specialCommands(globalMessage)
 
 var parceMessage = (message) => 
 {
-	return [message.content.slice(prefix.length).trim().split(/ +/).shift().toLowerCase(),  queue.get(message.guild.id)];
+	return message.content.slice(prefix.length).trim().split(/\s+/); // queue.get return undefined 
 }
 
 var commands = (message, parceMessage) => {
-	switch (parceMessage[0][0]) {
+	switch (parceMessage[0].toLowerCase()) {
 		case `play`:
 			execute(message, parceMessage);
 			break;
@@ -184,6 +181,9 @@ async function deleteMessages(amount, message, collector) {
 // music bot
 async function execute(message, parceMessage)
 {
+	const serverQueue = queue.get(message.guild.id);
+	console.log([...queue.entries()]);
+	console.log(message);
 	const voiceChannel = message.member.voice.channel;
 	if (!voiceChannel)
 	{
@@ -196,13 +196,13 @@ async function execute(message, parceMessage)
 		return message.channel.send ("Need permissions to join and speak");
 	}
 
-	const songInfo = await getInfo(parceMessage[0][1]);
+	const songInfo = await ytdl.getInfo(parceMessage[1]);
 
 	const song = 
 	{
 		title: songInfo.videoDetails.title,
 		url: songInfo.videoDetails.video_url,
-	}
+	};
 
 	if (!serverQueue)
 	{
@@ -212,23 +212,21 @@ async function execute(message, parceMessage)
 			voiceChannel: voiceChannel,
 			connection: null,
 			songs: [],
-			volume: 2,
 			playing: true,
 		};
-		
 		// Setting the queue using our contract
 		queue.set(message.guild.id, queueContruct);
 		
 		//Pushing the song to songs array
 		queueContruct.songs.push(song);
-
+		console.log(queueContruct.songs);
 		try
 		{
 			// try to join voicechat and save connection into object
-			var connection = await voiceChannel.join();
-			queueContruct.connection = connection;
+			queueContruct.connection = await voiceChannel.join();
+			console.log(queueContruct.connection)
 			// calling the play function to start a song
-			play(message.guild, queueContruct.songs[0]);
+			play(queueContruct);
 		}
 		catch (err)
 		{
@@ -244,11 +242,10 @@ async function execute(message, parceMessage)
 	}
 }
 
-
-function play(guild, song)
+function play(serverQueue)
 {
-	const serverQueue = queue.get(guild.id);
-	if (!song)
+	console.log(serverQueue);
+	if (!serverQueue.songs[0]) // why cant i do this?
 	{
 		serverQueue.voiceChannel.leave();
 		queue.delete(guild.id);
@@ -256,20 +253,20 @@ function play(guild, song)
 	}
 
 	const dispatcher = serverQueue.connection
-	.play (ytdl(song.url))
+	.play (ytdl(song.url))  // cannot read property 'play' of undefined
 	.on("finish", () =>
 	{
 		serverQueue.songs.shift();
-		play(guild,serverQueue.songs[0]);
+		play(queueContruct.connection, serverQueue.songs[0]); // queueContruct is not in scope
 	})
 	.on("error", error => console.error(error));
 
-	dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+	dispatcher.setVolume(1);
 	
 	serverQueue.textChannel.send(`Now playing: ${song.title}`);
 }
 
-function skip(message, serverQueue)
+function skip(message, serverQueue) // needs to get song array 
 {
 	if (!message.memeber.voice.channel)
 	{
@@ -279,7 +276,9 @@ function skip(message, serverQueue)
 	{
 		return message.channel.send("No songs to skip");
 	}
-	serverQueue.connection.dispatcher.end();
+	serverQueue.textChannel.send(`Skipped ${songs[0].title} Now playing: ${songs[1].title}`);
+	serverQueue.songs.shift();
+	play (message, serverQueue.songs[0]);
 }
 
 function stop (message, serverQueue)
@@ -295,8 +294,15 @@ function stop (message, serverQueue)
 	}
 
 	serverQueue.songs = [];
-	serverQueue.connection.dispatcher.end();
+	serverQueue.connection.dispatcher.end(); // what is serverQueue?
 }
+
+function YtSr ()
+{
+	
+}
+
+
 
 // Unhandled promise
 process.on('unhandledRejection', (err, p) => {
@@ -305,11 +311,5 @@ process.on('unhandledRejection', (err, p) => {
 	console.log(`Rejection: ${err}`);
   });
 
-
 // login to Discord with your app's token
 client.login(token);
-
-
-
-
-
