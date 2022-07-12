@@ -1,3 +1,3 @@
-/.vs #vscode files
-/node_modules #node modules
+**/.vs #vscode files
+**/node_modules #node modules
 config.json #discord bot token
