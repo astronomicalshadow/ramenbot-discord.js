@@ -1,15 +1,9 @@
-// require the discord.js module
-//const toMP3 = require ('toMP3.js');
-
 const Discord = require('discord.js');
 const {prefix, token} = require('./config.json');
-const ytdl = require('ytdl-core');
+const YTMusic = require('./YTMusicbot.js')
 
 // create a new Discord client
 const client = new Discord.Client();
-
-// Song queue
-const queue = new Map();
 
 client.once('ready', () => 
 {
@@ -36,7 +30,6 @@ client.on('message', async message =>
 
 });
 
-
 function specialCommands(globalMessage) 
 {
 	switch (globalMessage)
@@ -59,31 +52,35 @@ var parceMessage = (message) =>
 }
 
 var commands = (message, parceMessage) => {
+
 	switch (parceMessage[0].toLowerCase()) {
 		case `play`:
-			execute(message, parceMessage);
+			YTMusic.play(message, parceMessage);
 			break;
+
 		case `skip`:
-			skip(message, parceMessage);
+			YTMusic.skip(message, parceMessage);
 			break;
+
 		case `stop`:
-			stop(message, parceMessage);
+			YTMusic.stop(message, parceMessage);
 			break;
+			
 		case `ping`:
 			message.channel.send('Pong.');
 			break;
-		case `beep`:
-			message.channel.send('Boop.');
-			break;
+
 		case `server`:
 			message.channel.send(`This server's name is: ${message.guild.name}\n Total members: ${message.guild.memberCount}`);
 			break;
+
 		case `user-info`:
 			message.channel.send(`Your username: ${message.author.username}\n Your ID: ${message.author.id}`);
 			break;
-		case `arguments`:
+
+		case `arguments`: // what does this do?
 			if (!args.length) {
-				return message.channel.send(`You didn't provide any arguments, ${message.author}!`);
+				return message.channel.send(`You didn't provide any arguments, @${message.author}`);
 			}
 			else if (args[0] === 'foo') {
 				return message.channel.send('bar');
@@ -91,6 +88,7 @@ var commands = (message, parceMessage) => {
 
 			message.channel.send(`Command name: ${command}\nArguments: ${args}`);
 			break;
+
 		case `kick`:
 			if (!message.mentions.users.size) {
 				return message.reply('you need to tag a user in order to kick them!');
@@ -101,6 +99,7 @@ var commands = (message, parceMessage) => {
 
 			message.channel.send(`You wanted to kick: ${taggedUser.username}`);
 			break;
+
 		case `avatar`:
 			if (!message.mentions.users.size) {
 				return message.channel.send(`Your avatar: <${message.author.displayAvatarURL({ format: "png", dynamic: true })}>`);
@@ -177,139 +176,5 @@ async function deleteMessages(amount, message, collector) {
 	}
 }
 */
-
-// music bot
-async function execute(message, parceMessage)
-{
-	const serverQueue = queue.get(message.guild.id);
-	console.log([...queue.entries()]);
-	console.log(message);
-	const voiceChannel = message.member.voice.channel;
-	if (!voiceChannel)
-	{
-		return message.channel.send ("You need to be in a voice channel");
-	}
-
-	const permissions = voiceChannel.permissionsFor(message.client.user);
-	if(!permissions.has("CONNECT") || !permissions.has("SPEAK"))
-	{
-		return message.channel.send ("Need permissions to join and speak");
-	}
-
-	const songInfo = await ytdl.getInfo(parceMessage[1]);
-
-	const song = 
-	{
-		title: songInfo.videoDetails.title,
-		url: songInfo.videoDetails.video_url,
-	};
-
-	if (!serverQueue)
-	{
-		const queueContruct =
-		{
-			textChannel: message.channel,
-			voiceChannel: voiceChannel,
-			connection: null,
-			songs: [],
-			playing: true,
-		};
-		// Setting the queue using our contract
-		queue.set(message.guild.id, queueContruct);
-		
-		//Pushing the song to songs array
-		queueContruct.songs.push(song);
-		console.log(queueContruct.songs);
-		try
-		{
-			// try to join voicechat and save connection into object
-			queueContruct.connection = await voiceChannel.join();
-			console.log(queueContruct.connection)
-			// calling the play function to start a song
-			play(queueContruct);
-		}
-		catch (err)
-		{
-			console.log(err);
-			queue.delete(message.guild.id);
-			return message.channel.send(err.toString());
-		}
-	}
-	else
-	{
-		serverQueue.songs.push(song);
-		return message.channel.send(`${song.title} has been added to queue`)
-	}
-}
-
-function play(serverQueue)
-{
-	console.log(serverQueue);
-	if (!serverQueue.songs[0]) // why cant i do this?
-	{
-		serverQueue.voiceChannel.leave();
-		queue.delete(guild.id);
-		return;
-	}
-
-	const dispatcher = serverQueue.connection
-	.play (ytdl(song.url))  // cannot read property 'play' of undefined
-	.on("finish", () =>
-	{
-		serverQueue.songs.shift();
-		play(queueContruct.connection, serverQueue.songs[0]); // queueContruct is not in scope
-	})
-	.on("error", error => console.error(error));
-
-	dispatcher.setVolume(1);
-	
-	serverQueue.textChannel.send(`Now playing: ${song.title}`);
-}
-
-function skip(message, serverQueue) // needs to get song array 
-{
-	if (!message.memeber.voice.channel)
-	{
-		return message.channel.send ("You must be in the channel");
-	}
-	if (!serverQueue)
-	{
-		return message.channel.send("No songs to skip");
-	}
-	serverQueue.textChannel.send(`Skipped ${songs[0].title} Now playing: ${songs[1].title}`);
-	serverQueue.songs.shift();
-	play (message, serverQueue.songs[0]);
-}
-
-function stop (message, serverQueue)
-{
-	if (!message.member.voice.channel)
-	{
-		return message.channel.send ("You must be in the channel");
-	}
-
-	if (!serverQueue)
-	{
-		return message.channel.send("No song to stop");
-	}
-
-	serverQueue.songs = [];
-	serverQueue.connection.dispatcher.end(); // what is serverQueue?
-}
-
-function YtSr ()
-{
-	
-}
-
-
-
-// Unhandled promise
-process.on('unhandledRejection', (err, p) => {
-	// console.log('An unhandledRejection occurred');
-	console.log(`Rejected Promise: ${p}`);
-	console.log(`Rejection: ${err}`);
-  });
-
 // login to Discord with your app's token
 client.login(token);
