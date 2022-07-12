@@ -1,6 +1,6 @@
 const ytdl = require('ytdl-core'); // instead of downloading, use streaming instead -> no downloads, instant playback
 const ytsr = require('ytsr');
-
+const response = require('./MessageHandler.js');
 
 // Song queue
 const queue = new Map();
@@ -21,6 +21,7 @@ async function play(message, parceMessage)
 {
 	const serverQueue = queue.get(message.guild.id);
 	const voiceChannel = message.member.voice.channel;
+	
 	if (!voiceChannel)
 	{
 		return message.channel.send ("You need to be in a voice channel");
@@ -33,12 +34,11 @@ async function play(message, parceMessage)
 		return message.channel.send ("Need permissions to join and speak");
 	}
 	
-	
-	const searchResults = await ytsr (parceMessage[1]);
+	const searchResults = await ytsr (parceMessage.slice(1).join(' '));
 
 	console.log(searchResults)
 
-	const songInfo = await ytdl.getInfo( await ytsr(parceMessage[1]).url ); // replace this with ytsr
+	const songInfo = await ytdl.getInfo( await ytsr(parceMessage.slice(1).join(' ')).url); // replace this with ytsr
     
 	console.log(songInfo)
 
@@ -146,12 +146,3 @@ function stop (message, serverQueue)
 // 	const searchResults = await ytsr(searchString, [options]);
 
 // }
-
-
-
-// Unhandled promise
-process.on('unhandledRejection', (err, p) => {
-	// console.log('An unhandledRejection occurred');
-	console.log(`Rejected Promise: ${p}`);
-	console.log(`Rejection: ${err}`);
-  });
