@@ -4,7 +4,7 @@ const token = require('./token.json');
 const MessageHandler = require ('./MessageHandler.js');
 const YTMusic = require('./YTMusicbot.js');
 
-console.log(typeof MessageHandler)
+console.log(typeof MessageHandler.MessageHandler)
 
 client.once('ready', () => 
 {
