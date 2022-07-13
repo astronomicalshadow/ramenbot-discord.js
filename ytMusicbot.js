@@ -1,4 +1,4 @@
-const ytdl = require('ytdl-core'); // instead of downloading, use streaming instead -> no downloads, instant playback
+const ytdl = require('ytdl-core'); // instead of downloading the entire video write a video buffer so that the song can be played sooner
 const ytsr = require('ytsr');
 const response = require('./MessageHandler.js');
 

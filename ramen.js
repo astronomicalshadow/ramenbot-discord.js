@@ -19,4 +19,4 @@ client.on('message', async message =>
 	MessageHandler.MessageHandler(message);
 });
 // login to Discord with your app's token
-client.login(token.token);
+client.login(token);

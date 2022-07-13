@@ -5,4 +5,4 @@
 node_modules/
 
 #discord bot token
-/token.json
+token.json

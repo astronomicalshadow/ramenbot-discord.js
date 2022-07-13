@@ -1,13 +1,13 @@
-const prefix = require('./config.json');
+const Settings = require('./config.json');
 const YTMusic = require('./YTMusicbot.js');
 
 let MessageHandler = (message) =>
 {
 	if (message.author.bot) return;
 
-	if (!message.content.startsWith(prefix.prefix)) 
+	if (!message.content.startsWith(Settings.prefix)) 
 	{
-		const GlobalMessage = message.content.toLowerCase().slice(prefix.length);
+		const GlobalMessage = message.content.toLowerCase().slice(Setting.prefix.length);
 
 		SpecialCommands(GlobalMessage, message);
 
@@ -48,7 +48,7 @@ let SpecialCommands = (GlobalMessage, message) => // messages without prefix
 let command = (message) => 
 {
 	// string into array of words 
-	let parceMessage = message.content.slice(prefix.prefix.length).trim().split(/\s+/); // queue.get return undefined 
+	let parceMessage = message.content.slice(Settings.prefix.length).trim().split(/\s+/); // queue.get return undefined 
 
 	switch (parceMessage[0].toLowerCase()) 
 	{ 
@@ -180,7 +180,7 @@ async function deleteMessages(amount, message, collector) {
 async function AwaitResponse (message, max = 1, time_out = 20000, errors = ['time']) 
 {
 	// Errors: ['time'] treats ending because of the time limit as an error
-	message.channel.awaitMessages({ filter: message => message.content.startsWith(prefix), max: max, time: time_out, errors: errors })
+	message.channel.awaitMessages({ filter: message => message.content.startsWith(Settings.prefix), max: max, time: time_out, errors: errors })
 	
 	.then(collected => {return collected})
 
