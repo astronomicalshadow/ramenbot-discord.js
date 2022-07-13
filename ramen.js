@@ -1,10 +1,8 @@
 const Discord = require('discord.js');
-const client = new Discord.Client(); // create a new Discord client
 const token = require('./token.json');
 const MessageHandler = require ('./MessageHandler.js');
-const YTMusic = require('./YTMusicbot.js');
 
-console.log(typeof MessageHandler.MessageHandler)
+const client = new Discord.Client(); // create a new Discord client
 
 client.once('ready', () => 
 {

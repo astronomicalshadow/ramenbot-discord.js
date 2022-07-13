@@ -1,10 +1,11 @@
 const prefix = require('./config.json');
+const YTMusic = require('./YTMusicbot.js');
 
 let MessageHandler = (message) =>
 {
 	if (message.author.bot) return;
 
-	if (!message.content.startsWith(prefix)) 
+	if (!message.content.startsWith(prefix.prefix)) 
 	{
 		const GlobalMessage = message.content.toLowerCase().slice(prefix.length);
 
@@ -44,16 +45,16 @@ let SpecialCommands = (GlobalMessage, message) => // messages without prefix
 	}
 }
 
-let command = (message) => {
+let command = (message) => 
+{
+	// string into array of words 
+	let parceMessage = message.content.slice(prefix.prefix.length).trim().split(/\s+/); // queue.get return undefined 
 
-	let parceMessage = (message) => // string into array of words
-	{
-		return message.content.slice(prefix.length).trim().split(/\s+/); // queue.get return undefined 
-	}
-
-	switch (parceMessage[0].toLowerCase()) { // list of commands
+	switch (parceMessage[0].toLowerCase()) 
+	{ 
+		// list of commands
 		case `play`:
-			YTMusic.play(message, parceMessage);
+			YTMusic.AppendSong(message, parceMessage);
 			break;
 
 		case `skip`:
@@ -196,3 +197,9 @@ process.on // all async error here
 	console.log(`Rejection: ${error}`);
 	}
 );
+
+module.exports = 
+{
+	MessageHandler,
+	AwaitResponse
+};

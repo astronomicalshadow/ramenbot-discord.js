@@ -6,7 +6,8 @@ const response = require('./MessageHandler.js');
 const queue = new Map();
 
 // youtube search - string
-async function YtSrSearch (message, pages = 1) {
+async function YtSrSearch (message, pages = 1) 
+{
 	searchResult = await ytsr(message, { pages: 1 });
 	
 	message.channel.send(await ytsr(message, { pages: pages }));
@@ -17,7 +18,7 @@ async function YtSrSearch (message, pages = 1) {
 }
 
 // music bot
-async function play(message, parceMessage)
+async function AppendSong(message, parceMessage)
 {
 	const serverQueue = queue.get(message.guild.id);
 	const voiceChannel = message.member.voice.channel;
@@ -146,3 +147,10 @@ function stop (message, serverQueue)
 // 	const searchResults = await ytsr(searchString, [options]);
 
 // }
+
+module.exports =
+{
+	AppendSong,
+	skip,
+	stop
+}
