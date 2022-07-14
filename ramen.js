@@ -1,8 +1,18 @@
-const Discord = require('discord.js');
-const token = require('./token.json');
+const { Client, Intents } = require('discord.js');
+const token = require('./token.json'); // make a json file named "token.jason" and copy token inside
 const MessageHandler = require ('./MessageHandler.js');
 
-const client = new Discord.Client(); // create a new Discord client
+const Intent = new Intents();
+
+Intent.add
+(
+	Intents.FLAGS.GUILDS,
+	Intents.FLAGS.GUILD_MESSAGES,
+	Intents.FLAGS.DIRECT_MESSAGES,
+	Intents.FLAGS.GUILD_VOICE_STATES
+);
+
+const client = new Client({intents: Intent}); // create a new Discord client
 
 client.once('ready', () => 
 {

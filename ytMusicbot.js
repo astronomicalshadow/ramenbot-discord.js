@@ -18,9 +18,8 @@ async function YtSrSearch (message, pages = 1)
 }
 
 // music bot
-async function AppendSong(message, parceMessage)
+async function SongList(message, parceMessage)
 {
-	const serverQueue = queue.get(message.guild.id);
 	const voiceChannel = message.member.voice.channel;
 	
 	if (!voiceChannel)
@@ -35,19 +34,22 @@ async function AppendSong(message, parceMessage)
 		return message.channel.send ("Need permissions to join and speak");
 	}
 	
-	const searchResults = await ytsr (parceMessage.slice(1).join(' '));
+	const options =
+	{
+		limit: 1
+	}
 
-	console.log(searchResults)
+	const searchResults = await ytsr (parceMessage.slice(1).join(' '), options);
 
-	const songInfo = await ytdl.getInfo( await ytsr(parceMessage.slice(1).join(' ')).url); // replace this with ytsr
-    
-	console.log(songInfo)
+	console.log(searchResults.items[0].title)
 
 	const song = 
 	{
-		title: songInfo.videoDetails.title,
-		url: songInfo.videoDetails.video_url,
+		title: searchResults.items[0].title,
+		url: searchResults.items[0].url
 	};
+
+	const serverQueue = queue.get(message.guild.id);
 
 	if (!serverQueue)
 	{
@@ -64,12 +66,15 @@ async function AppendSong(message, parceMessage)
 		
 		//Pushing the song to songs array
 		queueContruct.songs.push(song);
-		console.log(queueContruct.songs);
+		console.log(JSON.stringify(queueContruct.songs));
+
 		try
 		{
 			// try to join voicechat and save connection into object
-			queueContruct.connection = await voiceChannel.join();
+			queueContruct.connection = await voiceChannel.join(); // THIS IS NOT A FUNCTION GO READ THE DOC
+
 			console.log(queueContruct.connection)
+			
 			// calling the play function to start a song
 			play(queueContruct);
 		}
@@ -89,8 +94,8 @@ async function AppendSong(message, parceMessage)
 
 function play(serverQueue)
 {
-	console.log(serverQueue);
-	if (!serverQueue.songs[0]) // why cant i do this? need to fix
+	console.log(serverQueue.songs);
+	if (!serverQueue.songs) // why cant i do this? need to fix
 	{
 		serverQueue.voiceChannel.leave();
 		queue.delete(guild.id);
@@ -98,11 +103,13 @@ function play(serverQueue)
 	}
 
 	const dispatcher = serverQueue.connection
-	.play (ytdl(song.url))  // cannot read property 'play' of undefined
+
+	.play (ytdl(serverQueue.songs.url))  // cannot read property 'play' of undefined
+
 	.on("finish", () =>
 	{
 		serverQueue.songs.shift();
-		play(queueContruct.connection, serverQueue.songs[0]); // queueContruct is not in scope
+		SongList(queueContruct.connection, serverQueue.songs[0]); // queueContruct is not in scope
 	})
 	.on("error", error => console.error(error));
 
@@ -150,7 +157,7 @@ function stop (message, serverQueue)
 
 module.exports =
 {
-	AppendSong,
+	SongList,
 	skip,
 	stop
 }

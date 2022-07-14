@@ -54,7 +54,7 @@ let command = (message) =>
 	{ 
 		// list of commands
 		case `play`:
-			YTMusic.AppendSong(message, parceMessage);
+			YTMusic.SongList(message, parceMessage);
 			break;
 
 		case `skip`:
