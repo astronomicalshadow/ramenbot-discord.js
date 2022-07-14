@@ -21,6 +21,8 @@ async function YtSrSearch (message, pages = 1)
 async function SongList(message, parceMessage)
 {
 	const voiceChannel = message.member.voice.channel;
+
+	console.log(message.member.voice.channel);
 	
 	if (!voiceChannel)
 	{
@@ -71,7 +73,7 @@ async function SongList(message, parceMessage)
 		try
 		{
 			// try to join voicechat and save connection into object
-			queueContruct.connection = await voiceChannel.join(); // THIS IS NOT A FUNCTION GO READ THE DOC
+			queueContruct.connection = await voiceChannel.connect(); // THIS IS NOT A FUNCTION GO READ THE DOC
 
 			console.log(queueContruct.connection)
 			

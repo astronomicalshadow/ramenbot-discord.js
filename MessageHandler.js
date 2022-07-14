@@ -3,13 +3,17 @@ const YTMusic = require('./YTMusicbot.js');
 
 let MessageHandler = (message) =>
 {
+	console.log(message);
+	console.log(Settings.prefix);
+	console.log(message.content.startsWith(Settings.prefix));
+	console.log(!false);
 	if (message.author.bot) return;
 
 	if (!message.content.startsWith(Settings.prefix)) 
 	{
-		const GlobalMessage = message.content.toLowerCase().slice(Setting.prefix.length);
+		console.log("should be here");
 
-		SpecialCommands(GlobalMessage, message);
+		SpecialCommands(message.content.toLowerCase().split());
 
 		return;
 	}
@@ -17,8 +21,9 @@ let MessageHandler = (message) =>
 	command(message);
 }
 
-let SpecialCommands = (GlobalMessage, message) => // messages without prefix
+let SpecialCommands = (GlobalMessage) => // messages without prefix
 {
+	console.log(GlobalMessage);
 	switch (GlobalMessage)
 	{
 		case GlobalMessage.includes(`hungry`):
